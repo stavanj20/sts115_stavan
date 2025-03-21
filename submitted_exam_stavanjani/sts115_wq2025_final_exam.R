@@ -15,12 +15,18 @@
 events = c("Fri August-15 in 1969", "Tue Jun-6 in 1944", "Sat Jan-1 in 2000")
 
 # Code Answer:
+rDates = fast_strptime(events, "%a %B-%d in %Y")
+print(rDates)
 
+#The fast_strptime function takes a string argument and, using relevant formatting
+#given by the programmer, converts string literals into Rdate format. Here, we input
+#the exact format of the string with the date and use the function to read and convert
+#it to rDates
 
 # Narrative Answer:
 
-
-
+#Using a standardized date is a great idea. Dates are a form of data, and having
+#a standardized date would make the transfer or sharing of that data simpler and easier.
 
 ############
 # QUESTION 2 (15 points)
@@ -59,11 +65,12 @@ guads = data.frame(
 
 
 
-
-
 # Narrative Answer:
 
- 
+#Using the dplyr library, we can remove the dots in the Maya's menu string.
+#Then, we can use Regex to index our string into a dataframe using functions
+#like str_sub. Once our dataframe is ready, we can use functions like bind_rows
+#to combine the two dataframes
 
 
 # 2.2. Write code to generate a single data visualization to show the price by
@@ -73,13 +80,15 @@ guads = data.frame(
 
 # Code Answer:
 
-
-
+ggplot(menu) + aes(x = item, y = price, label = item) + geom_point()
 
 
 # Narrative Answer:
 
-
+#Usually calculating the price of a meal becomes tough since all prices are not available
+#at a glance, so having a graph in front means one can not only find the total meal cost
+#but also whether the restaurant as a whole is expensive or not to go to. Since a graph
+#gives a pretty good idea on average price
 
 
 #############
@@ -96,10 +105,16 @@ guads = data.frame(
 # this using your knowledge of how URLs are constructed.
 
 # Code Answer:
+library("httr")
+library("jsonlite")
 
+#querying the API
+response <- GET("https://cat-fact.herokuapp.com/facts/random?animal_type=cat&amount=5")
 
-
-
+#processing the response and displaying it
+bdy <- content(response, "text")
+bdy_json <- fromJSON(bdy)
+print(bdy_json$text)
 
 #############
 # QUESTION 4 (20 points)
@@ -113,9 +128,23 @@ guads = data.frame(
 
 
 # Code Answer:
+library("rvest")
+library("xml2")
 
+#read our webpage
+wiki_url = "https://en.wikipedia.org/wiki/List_of_female_Nobel_laureates"
+wiki_doc = read_html(wiki_url)
 
+#find all tables in the webpage
+tables = xml_find_all(wiki_doc, "//table")
 
+#The table we want is sortable on the link, so let's extract sortable tables
+tab = xml_find_all(tables, "//*[contains(@class, 'sortable')]")
+
+#display our table
+laureates = html_table(tab, fill = TRUE)
+laureates = laureates[[1]]
+print(laureates)
 
 ######################################
 # QUESTION 5 (20 points)
@@ -143,16 +172,22 @@ guads = data.frame(
                                                                                                         
 
 # Code Answer:
+# Load necessary library
+library(dplyr)
 
+nobel_df = readRDS("~/sts115/submitted_exam_stavanjani/nobel_laureates_messy.rds")
 
-
-
+#For this question, we can use the dplyr library again to identify parenthesis. 
+#using parenthesis as markers we can create substrings and replace them with 
+#the text of just the authors.
 
 # 5.2. What is something else you noticed about this data frame that should be
 # cleaned before it is used in an analysis?
 
 # Narrative Answer:
-
+#There are often more than one country names in the dataset when there are winners
+#from more than one country. This could interfere when counting the number of laureates
+#per country since R would take the string literal as one value.
 
 
 
@@ -167,8 +202,9 @@ demo <- carData::MplsDemo
 
 # Narrative Answer:
 
-
-
+#The 'demo' dataset contains the demography of a city. It contains variables such as
+#neighborhood, population, race, income, and college status. I found this out by using
+#the 'summary' function of R as shown above
 
 
 # 6.2. Investigate this dataset and provide a short answer to the questions below.
@@ -176,19 +212,39 @@ demo <- carData::MplsDemo
 # a. How many rows and columns are in the data set?
 # Narrative Answer: 
 
+#There are 84 rows and 8 columns
+
 # b. What are the names and classes of the columns in the data set?
 # Narrative Answer: 
 
+#neighborhood: character
+#population: numeric
+#white: numeric
+#black: numeric
+#foreignBorn: numeric
+#hhIncome: numeric
+#poverty: numeric
+#collegeGrad: numeric
+
 # c. How many missing values are in each column?
 # Narrative Answer: 
+#There are no missing values
+
+#Upon checking for missing values, we notice that there are none. Therefore, 
+#each column has no missing values
 
 # d. How many missing values are in the data set in total?
 # Narrative Answer: 
-
+#There are no missing values
 
 
 # Code Answer: Add any code here that you wrote to help you answer questions a-d above.
-
+str(demo)
+print(demo)
+summary(demo)
+nrow(demo)
+ncol(demo)
+is.na(demo)
 
 
 # 6.3. Write code to help you identify any outliers in 'demo'. You can use 
@@ -196,23 +252,20 @@ demo <- carData::MplsDemo
 # outliers you discover.
 
 # Code Answer
-
-
-
-
+library(ggplot2)
+ggplot(demo, aes(x = population)) + geom_boxplot()
+#We can create boxplots like these for each column to find the outliers
 
 # 6.4. Write a question to investigate using this data. Then, write code to 
 # generate a data visualization that helps address your question.
 
 # Your research question:
 
-
+# "Does having a college degree impact the household income in this town?"
 
 
 # Code Answer
-
-
-
+ggplot(demo) + aes(x = collegeGrad, y = hhIncome) + geom_point()
 
 
 #############
